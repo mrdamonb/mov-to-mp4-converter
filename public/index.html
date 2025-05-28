@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MOV to MP4 Converter</title>
+</head>
+<body>
+  <h1>MOV to MP4 Converter</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label>Select MOV files:</label><br>
+    <input type="file" name="videos" multiple accept=".mov"><br><br>
+
+    <label>Quality:</label>
+    <select name="quality">
+      <option value="high">High</option>
+      <option value="medium" selected>Medium</option>
+      <option value="low">Low</option>
+    </select><br><br>
+
+    <button type="submit">Convert</button>
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const results = document.getElementById('results');
+
+    form.onsubmit = async e => {
+      e.preventDefault();
+      results.innerHTML = "Converting...";
+
+      const formData = new FormData(form);
+      const res = await fetch('/convert', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        results.innerHTML = "❌ Conversion failed.";
+        return;
+      }
+
+      const data = await res.json();
+      results.innerHTML = "<h3>Download:</h3>";
+      data.files.forEach(file => {
+        const filename = file.split('/').pop();
+        const link = document.createElement('a');
+        link.href = `/download/${filename}`;
+        link.innerText = filename;
+        link.download = filename;
+        link.style.display = 'block';
+        results.appendChild(link);
+      });
+    };
+  </script>
+</body>
+</html>
